@@ -157,7 +157,16 @@ const [loading,setLoading]=useState(false)
           <div>
  <div className='mb-6'>
                     <label htmlFor="email" className='block text-gray-700 font-medium mb-1'>OTP</label>
-                    <input type="email" className='w-full border-[1px] border-gray-200 rounded-lg px-3 py-2 focus:outline-none  ' placeholder='Enter OTP' onChange={(e)=>setOtp(e.target.value)} value={otp} required/>
+                    <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={4}
+                          className='w-full border-[1px] border-gray-200 rounded-lg px-3 py-2 focus:outline-none'
+                          placeholder='Enter OTP'
+                          onChange={(e) => setOtp(e.target.value)}
+                          value={otp}
+                          required
+                      />
                 </div>
                 <button className={`w-full font-semibold py-2 rounded-lg transition duration-200 bg-[#ff4d2d] text-white hover:bg-[#e64323] cursor-pointer`} onClick={handleVerifyOtp} disabled={loading}>
                 {loading?<ClipLoader size={20} color='white'/>:"Verify"}

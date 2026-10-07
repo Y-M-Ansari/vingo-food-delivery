@@ -42,19 +42,20 @@ function SignUp() {
      }
 
     const handleGoogleAuth = async () => {
+
         if (!mobile) {
             setErr("Mobile number is required")
             return
         }
 
+        setLoading(true)
         setErr("")
 
         try {
+
             const provider = new GoogleAuthProvider()
 
             const result = await signInWithPopup(auth, provider)
-
-            setLoading(true)
 
             const { data } = await axios.post(
                 `${serverUrl}/api/auth/google-auth`,
@@ -72,6 +73,7 @@ function SignUp() {
             dispatch(setUserData(data))
 
         } catch (error) {
+
             console.error("Google Sign Up Error:", error)
 
             setErr(
@@ -79,8 +81,11 @@ function SignUp() {
                 error?.message ||
                 "Google Sign Up failed"
             )
+
         } finally {
+
             setLoading(false)
+
         }
     }
     return (
@@ -117,7 +122,11 @@ function SignUp() {
                     <div className='relative'>
                         <input type={`${showPassword ? "text" : "password"}`} className='w-full border rounded-lg px-3 py-2 focus:outline-none pr-10' placeholder='Enter your password' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setPassword(e.target.value)} value={password} required/>
 
-                        <button className='absolute right-3 cursor-pointer top-[14px] text-gray-500' onClick={() => setShowPassword(prev => !prev)}>{!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}</button>
+                        <button
+                            type="button"
+                            className='absolute right-3 cursor-pointer top-[14px] text-gray-500'
+                            onClick={() => setShowPassword(prev => !prev)}
+                        >{!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}</button>
                     </div>
                 </div>
                 {/* role*/}
@@ -127,13 +136,16 @@ function SignUp() {
                     <div className='flex gap-2'>
                         {["user", "owner", "deliveryBoy"].map((r) => (
                             <button
+                                key={r}
+                                type="button"
                                 className='flex-1 border rounded-lg px-3 py-2 text-center font-medium transition-colors cursor-pointer'
-                                onClick={()=>setRole(r)}
+                                onClick={() => setRole(r)}
                                 style={
-                                   role==r?
-                                   {backgroundColor:primaryColor,color:"white"}
-                                   :{border:`1px solid ${primaryColor}`,color:primaryColor}
-                                }>
+                                    role == r
+                                        ? { backgroundColor: primaryColor, color: "white" }
+                                        : { border: `1px solid ${primaryColor}`, color: primaryColor }
+                                }
+                            >
                                 {r}
                             </button>
                         ))}
