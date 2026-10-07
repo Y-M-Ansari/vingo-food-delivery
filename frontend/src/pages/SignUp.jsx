@@ -41,24 +41,53 @@ function SignUp() {
         }
      }
 
-     const handleGoogleAuth=async () => {
-        if(!mobile){
-          return setErr("mobile no is required")
+    const handleGoogleAuth = async () => {
+
+        if (!mobile) {
+            setErr("Mobile number is required")
+            return
         }
-        const provider=new GoogleAuthProvider()
-        const result=await signInWithPopup(auth,provider)
-  try {
-    const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
-        fullName:result.user.displayName,
-        email:result.user.email,
-        role,
-        mobile
-    },{withCredentials:true})
-   dispatch(setUserData(data))
-  } catch (error) {
-    console.log(error)
-  }
-     }
+
+        setLoading(true)
+        setErr("")
+
+        try {
+
+            const provider = new GoogleAuthProvider()
+
+            const result = await signInWithPopup(auth, provider)
+
+            const { data } = await axios.post(
+                `${serverUrl}/api/auth/google-auth`,
+                {
+                    fullName: result.user.displayName,
+                    email: result.user.email,
+                    role,
+                    mobile
+                },
+                {
+                    withCredentials: true
+                }
+            )
+
+            dispatch(setUserData(data))
+
+        } catch (error) {
+
+            console.error("Google Sign Up Error:", error)
+
+            setErr(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Google Sign Up failed"
+            )
+
+        } finally {
+
+            setLoading(false)
+
+        }
+    }
     return (
         <div className='min-h-screen w-full flex items-center justify-center p-4' style={{ backgroundColor: bgColor }}>
             <div className={`bg-white rounded-xl shadow-lg w-full max-w-md p-8 border-[1px] `} style={{
@@ -84,7 +113,7 @@ function SignUp() {
 
                 <div className='mb-4'>
                     <label htmlFor="mobile" className='block text-gray-700 font-medium mb-1'>Mobile</label>
-                    <input type="email" className='w-full border rounded-lg px-3 py-2 focus:outline-none ' placeholder='Enter your Mobile Number' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setMobile(e.target.value)} value={mobile} required/>
+                    <input type="tel" className='w-full border rounded-lg px-3 py-2 focus:outline-none ' placeholder='Enter your Mobile Number' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setMobile(e.target.value)} value={mobile} required/>
                 </div>
                 {/* password*/}
 
@@ -93,7 +122,11 @@ function SignUp() {
                     <div className='relative'>
                         <input type={`${showPassword ? "text" : "password"}`} className='w-full border rounded-lg px-3 py-2 focus:outline-none pr-10' placeholder='Enter your password' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setPassword(e.target.value)} value={password} required/>
 
-                        <button className='absolute right-3 cursor-pointer top-[14px] text-gray-500' onClick={() => setShowPassword(prev => !prev)}>{!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}</button>
+                        <button
+                            type="button"
+                            className='absolute right-3 cursor-pointer top-[14px] text-gray-500'
+                            onClick={() => setShowPassword(prev => !prev)}
+                        >{!showPassword ? <FaRegEye /> : <FaRegEyeSlash />}</button>
                     </div>
                 </div>
                 {/* role*/}
@@ -103,13 +136,16 @@ function SignUp() {
                     <div className='flex gap-2'>
                         {["user", "owner", "deliveryBoy"].map((r) => (
                             <button
+                                key={r}
+                                type="button"
                                 className='flex-1 border rounded-lg px-3 py-2 text-center font-medium transition-colors cursor-pointer'
-                                onClick={()=>setRole(r)}
+                                onClick={() => setRole(r)}
                                 style={
-                                   role==r?
-                                   {backgroundColor:primaryColor,color:"white"}
-                                   :{border:`1px solid ${primaryColor}`,color:primaryColor}
-                                }>
+                                    role == r
+                                        ? { backgroundColor: primaryColor, color: "white" }
+                                        : { border: `1px solid ${primaryColor}`, color: primaryColor }
+                                }
+                            >
                                 {r}
                             </button>
                         ))}
@@ -123,7 +159,7 @@ function SignUp() {
             {err && <p className='text-red-500 text-center my-[10px]'>*{err}</p>}
             
 
-            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100' onClick={handleGoogleAuth}>
+            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100 disabled:opacity-60' onClick={handleGoogleAuth} disabled={loading}>
 <FcGoogle size={20}/>
 <span>Sign up with Google</span>
             </button>

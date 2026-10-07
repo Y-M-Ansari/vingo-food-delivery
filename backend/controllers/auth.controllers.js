@@ -366,11 +366,17 @@ export const googleAuth = async (req, res) => {
             role
         } = req.body
 
-
         let user = await User.findOne({ email })
 
-
+        // If user does not exist, required information
+        // must be provided to create the account.
         if (!user) {
+
+            if (!fullName || !email || !mobile || !role) {
+                return res.status(400).json({
+                    message: "Please complete your profile before creating a Google account."
+                })
+            }
 
             user = await User.create({
                 fullName,
@@ -380,9 +386,7 @@ export const googleAuth = async (req, res) => {
             })
         }
 
-
         const token = await genToken(user._id)
-
 
         res.cookie(
             "token",
@@ -390,13 +394,14 @@ export const googleAuth = async (req, res) => {
             cookieOptions
         )
 
-
         return res.status(200).json(user)
 
     } catch (error) {
 
-        return res.status(500).json(
-            `googleAuth error ${error}`
-        )
+        console.error("googleAuth error:", error)
+
+        return res.status(500).json({
+            message: "Google authentication failed"
+        })
     }
 }
