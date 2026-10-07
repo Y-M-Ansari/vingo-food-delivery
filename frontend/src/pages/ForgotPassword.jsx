@@ -160,6 +160,7 @@ const [loading,setLoading]=useState(false)
                     <input
                           type="text"
                           inputMode="numeric"
+                          pattern="[0-9]*" 
                           maxLength={4}
                           className='w-full border-[1px] border-gray-200 rounded-lg px-3 py-2 focus:outline-none'
                           placeholder='Enter OTP'
