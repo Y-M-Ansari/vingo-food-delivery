@@ -97,8 +97,19 @@ socketHandler(io)
 // START SERVER
 // --------------------------------------------------
 
-server.listen(port, "0.0.0.0", () => {
-    connectDb()
-    console.log(`server started at ${port}`)
-    console.log(`Allowed frontend origin: ${frontendUrl}`)
-})
+
+const startServer = async () => {
+    try {
+        await connectDb()
+
+        server.listen(port, "0.0.0.0", () => {
+            console.log(`server started at ${port}`)
+            console.log(`Allowed frontend origin: ${frontendUrl}`)
+        })
+    } catch (error) {
+        console.error("Failed to start server:", error)
+        process.exit(1)
+    }
+}
+
+startServer()
