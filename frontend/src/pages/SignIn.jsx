@@ -38,17 +38,27 @@ function SignIn() {
         }
      }
      const handleGoogleAuth=async () => {
-             const provider=new GoogleAuthProvider()
-             const result=await signInWithPopup(auth,provider)
-       try {
-         const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
-             email:result.user.email,
-         },{withCredentials:true})
-         dispatch(setUserData(data))
-       } catch (error) {
-         console.log(error)
-       }
-          }
+        setLoading(true)
+        setErr("")
+        try {
+          const provider=new GoogleAuthProvider()
+          provider.setCustomParameters({ prompt: "select_account" })
+          const result=await signInWithPopup(auth,provider)
+          const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
+            email:result.user.email,
+            mode:"signIn"
+          },{withCredentials:true})
+          dispatch(setUserData(data))
+        } catch (error) {
+          const message=error?.response?.data?.message
+            || (error?.code === "auth/popup-closed-by-user"
+              ? "Google sign-in was cancelled."
+              : "Google sign-in failed. Please try again.")
+          setErr(message)
+        } finally {
+          setLoading(false)
+        }
+      }
     return (
         <div className='min-h-screen w-full flex items-center justify-center p-4' style={{ backgroundColor: bgColor }}>
             <div className={`bg-white rounded-xl shadow-lg w-full max-w-md p-8 border-[1px] `} style={{
@@ -85,7 +95,7 @@ function SignIn() {
             </button>
       {err && <p className='text-red-500 text-center my-[10px]'>*{err}</p>}
 
-            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100' onClick={handleGoogleAuth}>
+            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100 disabled:opacity-60' onClick={handleGoogleAuth} disabled={loading}>
 <FcGoogle size={20}/>
 <span>Sign In with Google</span>
             </button>

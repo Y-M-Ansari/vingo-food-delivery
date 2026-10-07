@@ -363,14 +363,34 @@ export const googleAuth = async (req, res) => {
             fullName,
             email,
             mobile,
-            role
+            role,
+            mode
         } = req.body
+
+
+        if (!email) {
+            return res.status(400).json({
+                message: "Google account email is required."
+            })
+        }
 
 
         let user = await User.findOne({ email })
 
 
         if (!user) {
+
+            if (mode === "signIn") {
+                return res.status(404).json({
+                    message: "No Vingo account exists for this Google account. Please sign up first."
+                })
+            }
+
+            if (!fullName || !mobile || !role) {
+                return res.status(400).json({
+                    message: "Name, mobile number, and role are required to create an account."
+                })
+            }
 
             user = await User.create({
                 fullName,

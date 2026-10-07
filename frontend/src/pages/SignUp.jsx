@@ -45,19 +45,29 @@ function SignUp() {
         if(!mobile){
           return setErr("mobile no is required")
         }
-        const provider=new GoogleAuthProvider()
-        const result=await signInWithPopup(auth,provider)
-  try {
-    const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
-        fullName:result.user.displayName,
-        email:result.user.email,
-        role,
-        mobile
-    },{withCredentials:true})
-   dispatch(setUserData(data))
-  } catch (error) {
-    console.log(error)
-  }
+        setLoading(true)
+        setErr("")
+        try {
+          const provider=new GoogleAuthProvider()
+          provider.setCustomParameters({ prompt: "select_account" })
+          const result=await signInWithPopup(auth,provider)
+          const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
+            fullName:result.user.displayName,
+            email:result.user.email,
+            role,
+            mobile,
+            mode:"signUp"
+          },{withCredentials:true})
+          dispatch(setUserData(data))
+        } catch (error) {
+          const message=error?.response?.data?.message
+            || (error?.code === "auth/popup-closed-by-user"
+              ? "Google sign-up was cancelled."
+              : "Google sign-up failed. Please try again.")
+          setErr(message)
+        } finally {
+          setLoading(false)
+        }
      }
     return (
         <div className='min-h-screen w-full flex items-center justify-center p-4' style={{ backgroundColor: bgColor }}>
@@ -84,7 +94,7 @@ function SignUp() {
 
                 <div className='mb-4'>
                     <label htmlFor="mobile" className='block text-gray-700 font-medium mb-1'>Mobile</label>
-                    <input type="email" className='w-full border rounded-lg px-3 py-2 focus:outline-none ' placeholder='Enter your Mobile Number' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setMobile(e.target.value)} value={mobile} required/>
+                    <input type="tel" className='w-full border rounded-lg px-3 py-2 focus:outline-none ' placeholder='Enter your Mobile Number' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setMobile(e.target.value)} value={mobile} required/>
                 </div>
                 {/* password*/}
 
@@ -123,7 +133,7 @@ function SignUp() {
             {err && <p className='text-red-500 text-center my-[10px]'>*{err}</p>}
             
 
-            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100' onClick={handleGoogleAuth}>
+            <button className='w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition cursor-pointer duration-200 border-gray-400 hover:bg-gray-100 disabled:opacity-60' onClick={handleGoogleAuth} disabled={loading}>
 <FcGoogle size={20}/>
 <span>Sign up with Google</span>
             </button>
