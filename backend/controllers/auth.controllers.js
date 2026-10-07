@@ -363,32 +363,18 @@ export const googleAuth = async (req, res) => {
             fullName,
             email,
             mobile,
-            role,
-            mode
+            role
         } = req.body
-
-
-        if (!email) {
-            return res.status(400).json({
-                message: "Google account email is required."
-            })
-        }
-
 
         let user = await User.findOne({ email })
 
-
+        // If user does not exist, required information
+        // must be provided to create the account.
         if (!user) {
 
-            if (mode === "signIn") {
-                return res.status(404).json({
-                    message: "No Vingo account exists for this Google account. Please sign up first."
-                })
-            }
-
-            if (!fullName || !mobile || !role) {
+            if (!fullName || !email || !mobile || !role) {
                 return res.status(400).json({
-                    message: "Name, mobile number, and role are required to create an account."
+                    message: "Please complete your profile before creating a Google account."
                 })
             }
 
@@ -400,9 +386,7 @@ export const googleAuth = async (req, res) => {
             })
         }
 
-
         const token = await genToken(user._id)
-
 
         res.cookie(
             "token",
@@ -410,13 +394,14 @@ export const googleAuth = async (req, res) => {
             cookieOptions
         )
 
-
         return res.status(200).json(user)
 
     } catch (error) {
 
-        return res.status(500).json(
-            `googleAuth error ${error}`
-        )
+        console.error("googleAuth error:", error)
+
+        return res.status(500).json({
+            message: "Google authentication failed"
+        })
     }
 }

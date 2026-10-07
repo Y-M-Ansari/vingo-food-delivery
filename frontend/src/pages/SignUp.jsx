@@ -41,34 +41,48 @@ function SignUp() {
         }
      }
 
-     const handleGoogleAuth=async () => {
-        if(!mobile){
-          return setErr("mobile no is required")
+    const handleGoogleAuth = async () => {
+        if (!mobile) {
+            setErr("Mobile number is required")
+            return
         }
-        setLoading(true)
+
         setErr("")
+
         try {
-          const provider=new GoogleAuthProvider()
-          provider.setCustomParameters({ prompt: "select_account" })
-          const result=await signInWithPopup(auth,provider)
-          const {data}=await axios.post(`${serverUrl}/api/auth/google-auth`,{
-            fullName:result.user.displayName,
-            email:result.user.email,
-            role,
-            mobile,
-            mode:"signUp"
-          },{withCredentials:true})
-          dispatch(setUserData(data))
+            const provider = new GoogleAuthProvider()
+
+            const result = await signInWithPopup(auth, provider)
+
+            setLoading(true)
+
+            const { data } = await axios.post(
+                `${serverUrl}/api/auth/google-auth`,
+                {
+                    fullName: result.user.displayName,
+                    email: result.user.email,
+                    role,
+                    mobile
+                },
+                {
+                    withCredentials: true
+                }
+            )
+
+            dispatch(setUserData(data))
+
         } catch (error) {
-          const message=error?.response?.data?.message
-            || (error?.code === "auth/popup-closed-by-user"
-              ? "Google sign-up was cancelled."
-              : "Google sign-up failed. Please try again.")
-          setErr(message)
+            console.error("Google Sign Up Error:", error)
+
+            setErr(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Google Sign Up failed"
+            )
         } finally {
-          setLoading(false)
+            setLoading(false)
         }
-     }
+    }
     return (
         <div className='min-h-screen w-full flex items-center justify-center p-4' style={{ backgroundColor: bgColor }}>
             <div className={`bg-white rounded-xl shadow-lg w-full max-w-md p-8 border-[1px] `} style={{
